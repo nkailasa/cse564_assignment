@@ -1,16 +1,15 @@
-package com;
-
+package com; 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Stack;
 
-public class TSPNearestNeighbour {
+public class TSPNearestNeighbor {
 	private int numberOfNodes;
 	private Stack<Integer> stack;
 	private Double[][] adjacencyMatrix;
 	private static ArrayList<Integer> nnResult = new ArrayList<Integer>();
 
-	public TSPNearestNeighbour() {
+	public TSPNearestNeighbor() {
 		stack = new Stack<Integer>();
 	}
 

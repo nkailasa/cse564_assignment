@@ -1,4 +1,5 @@
-package gui;
+package com;
+
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,3 +53,4 @@ class DrawPath extends Main implements ActionListener {
 	}
 
 }
+
