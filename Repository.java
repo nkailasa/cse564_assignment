@@ -1,7 +1,10 @@
 package com;
 
 import java.awt.Point;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -58,11 +61,27 @@ public class Repository extends Observable {
 		observers.add(observer);
 	}
 
-	public void savePointsToRepo(int count) {
+	public void savePointsToRepo(int count) throws IOException {
 		String newValues = "";
+		RandomAccessFile f;
+		try {
+			System.out.println(pointStack.size());
+			System.out.println(count);
+			
+			int size = Math.addExact(pointStack.size(), count);
+			System.out.println(size);
+			f = new RandomAccessFile(new File("C:\\MyOutputFile.txt"), "rw");
+			f.seek(0); // to the beginning
+			f.write("DIMENSION : ".getBytes());
+			f.write(String.valueOf(size).getBytes());
+			f.close();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		for(Point p: pointStack) {
-			newValues+=count+" "+p.x+" "+p.y+"\n";
 			count++;
+			newValues+=count+" "+p.x+" "+p.y+"\n";
 		}
 		
 		try {

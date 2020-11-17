@@ -31,6 +31,13 @@ public class MenuOptionsController {
 			JMenuItem saveMenuItem, JMenuItem runMenuItem, JMenuItem stopMenuItem, JMenuItem newMenuItem,
 			JMenuItem aboutMenuItem) {
 		this.shapes = shapes;
+		runMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Professor p = new Professor();
+				p.start();
+			}
+		});
 		aboutMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				JOptionPane.showMessageDialog(frame,
@@ -41,8 +48,13 @@ public class MenuOptionsController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Repository.getInstance().savePointsToRepo(count);
-				
+				try {
+					Repository.getInstance().savePointsToRepo(count);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
 			}
 		});
 		openMenuItem.addActionListener(new ActionListener() {
@@ -53,7 +65,7 @@ public class MenuOptionsController {
 
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 					File selectedFile = jfc.getSelectedFile();
-					
+
 					BufferedReader br = null;
 					try {
 						br = new BufferedReader(new FileReader(selectedFile));

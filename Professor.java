@@ -1,11 +1,14 @@
 package com;
 
-public class Professor implements Runnable {
+public class Professor {
+	static int count;
 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
+	public static void start() {
+		count = Blackboard.count;
+		for(int i=0;i<count;i++) {
+			Student s = new Student(i);
+			s.start();
+		}
 	}
 
 }

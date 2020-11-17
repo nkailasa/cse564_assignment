@@ -13,14 +13,13 @@ public class TSPNearestNeighbor {
 		stack = new Stack<Integer>();
 	}
 
-	public ArrayList<Integer> generateAdjacencyMatrix(Double[][] coordinates, int count) {
+	public Double[][] generateAdjacencyMatrix(Double[][] coordinates, int count) {
 		AdjacencyMatrix am = new AdjacencyMatrix();
 		adjacencyMatrix = am.generateGraph(coordinates, new Double[count][count], count);
-		tsp();
-		return nnResult;
+		return adjacencyMatrix;
 	}
 
-	public void tsp() {
+	public ArrayList<Integer> tsp(int startCity) {
 		numberOfNodes = adjacencyMatrix[1].length - 1;
 		int[] visited = new int[numberOfNodes + 1];
 		visited[1] = 1;
@@ -28,7 +27,7 @@ public class TSPNearestNeighbor {
 		int element, dst = 0, i;
 		double min = Double.MAX_VALUE;
 		boolean minFlag = false;
-		System.out.print(1 + "\t");
+	//	System.out.print(1 + "\t");
 
 		while (!stack.isEmpty()) {
 			element = stack.peek();
@@ -49,22 +48,13 @@ public class TSPNearestNeighbor {
 				visited[dst] = 1;
 				stack.push(dst);
 				nnResult.add(dst);
-				System.out.print(dst + "\t");
+			//	System.out.print(dst + "\t");
 				minFlag = false;
 				continue;
 			}
 			stack.pop();
 		}
-	}
-
-	public static void main(String... arg) {
-
-		try {
-			System.out.println("the citys are visited as follows");
-
-		} catch (InputMismatchException inputMismatch) {
-			System.out.println("Wrong Input format");
-		}
+		return nnResult;
 	}
 }
 
