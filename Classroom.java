@@ -10,7 +10,7 @@ public class Classroom extends Thread{
 	static int count;
 	static Student[] s;
 	public static void init(){
-		count = Blackboard.count;
+		count = Repository.count;
 		s = new Student[count];
 		for(int i=0;i<count;i++) {
 			 students.add(new Student(i));

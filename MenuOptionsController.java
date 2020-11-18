@@ -53,7 +53,7 @@ public class MenuOptionsController {
 		aboutMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				JOptionPane.showMessageDialog(frame,
-						"Assignment 05 Team Members: \n Nevedita Kailasam \n Kanti Nizampatnam \n Saloni");
+						"Assignment 05 Team Members: \n Nevedita Kailasam \n Kanti Nizampatnam \n Saloni Chudgar");
 			}
 		});
 		saveMenuItem.addActionListener(new ActionListener() {
@@ -91,7 +91,7 @@ public class MenuOptionsController {
 								break;
 							currLine = br.readLine();
 						}
-						coordinates = Blackboard.populateTable(new Double[count][2], currLine, br, count);
+						coordinates = Repository.populateTable(new Double[count][2], currLine, br, count);
 						for (int i = 0; i < coordinates.length; i++) {
 							for (int j = 0; j < 2; j++) {
 								System.out.print(coordinates[i][j] + " ");

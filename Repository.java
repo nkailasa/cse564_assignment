@@ -1,8 +1,10 @@
 package com;
 
 import java.awt.Point;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
@@ -19,6 +21,12 @@ import java.util.TreeMap;
 import javax.sound.sampled.Line;
 
 public class Repository extends Observable {
+	public static Double[][] coordinates;
+	public static int count;
+	static double xmin = Double.MAX_VALUE;
+	static double xmax = Double.MIN_VALUE;
+	static double ymin = Double.MAX_VALUE;
+	static double ymax = Double.MIN_VALUE;
 	private List<Canvas> observers = new ArrayList<Canvas>();
 	private static Repository repoObj;
 	//private static PriorityQueue<Double> pq = new PriorityQueue<Double>((a,b) -> {return (int) (a-b);});
@@ -54,6 +62,47 @@ public class Repository extends Observable {
 	Stack<Line> getLines() {
 		return lineStack;
 
+	}
+	
+	static Double[][] populateTable(Double[][] coordinates, String currLine, BufferedReader br, int count) {
+		int idx = 0;
+		try {
+			String line = currLine;
+			Repository.count = count;
+			Repository.coordinates = coordinates;
+			File outputfile = new File("C:\\MyOutputFile.txt");
+			FileOutputStream outstream = new FileOutputStream(outputfile);
+			outstream.write("DIMENSION:".getBytes());
+			outstream.write(String.valueOf(count).getBytes());
+			outstream.write("\n".getBytes());
+			while (idx < count && line != null) {
+				outstream.write(line.getBytes());
+				outstream.write(Byte.valueOf((byte) '\n'));
+				String[] values = line.trim().split(" +");
+				if (values.length > 1) {
+					coordinates[idx][0] = Double.valueOf(values[1]);
+					coordinates[idx++][1] = Double.valueOf(values[2]);
+					xmax = Math.max(Double.valueOf(values[1]), xmax);
+					ymax = Math.max(Double.valueOf(values[2]), ymax);
+				}
+				line = br.readLine();
+			}
+
+			outstream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Double factor =xmax>500? xmax/500 :xmax;
+		System.out.println("Dividing factor:" + factor);
+		System.out.println("count:" + count);
+		idx = 0;
+		for (; idx < count; idx++) {
+			for (int j = 0; j < 2; j++) {
+				coordinates[idx][j] = coordinates[idx][j] / factor;
+
+			}
+		}
+		return coordinates;
 	}
 
 	public void setPoints(int x, int y) {

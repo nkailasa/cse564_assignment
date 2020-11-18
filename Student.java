@@ -6,9 +6,8 @@ import java.util.SortedMap;
 import java.util.Stack;
 
 public class Student implements Runnable {
-	Blackboard bb = new Blackboard();
-	Double[][] coordinates = Blackboard.coordinates;
-	int count = Blackboard.count;
+	Double[][] coordinates = Repository.coordinates;
+	int count = Repository.count;
 	ArrayList<Integer> tspNearestNodeList;
 	List<DrawPath> shapes = new ArrayList<>();
 	Double[][] adjacencyMatrix = new TSPNearestNeighbor().generateAdjacencyMatrix(coordinates, count);;
