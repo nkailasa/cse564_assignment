@@ -5,11 +5,13 @@ import java.util.List;
 
 public class Classroom extends Thread{
 	static List<Student> students = new ArrayList();
-//	Professor professor = new Professor();
-//	List<Thread> threads = new ArrayList<>();
+	 
+	
 	static int count;
 	static Student[] s;
-	public static void init(){
+	public static void init() throws InterruptedException{
+		Professor runnable = new Professor(); 
+		Thread profThread = new Thread(runnable);
 		count = Repository.count;
 		s = new Student[count];
 		for(int i=0;i<count;i++) {
@@ -17,7 +19,9 @@ public class Classroom extends Thread{
 		}
 		for(Student s:students) {
 			s.start();
+			profThread.start();
 		}
+		
 	}
 	
 	public static void kill() {
@@ -31,6 +35,5 @@ public class Classroom extends Thread{
 		for(Student s:students) {
 			s.freeze();
 		}
-		new Professor();
 	}
 }

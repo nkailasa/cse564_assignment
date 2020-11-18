@@ -1,11 +1,13 @@
 package com;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -15,7 +17,7 @@ import javax.swing.JPanel;
 
 public class Canvas extends JPanel implements Observer {
 	Double[][] coordinates;
-	List<DrawPath> shapes;
+	List<List<Line2D>> lines;
 	Stack<Point> pointStack;
 	Repository repo;
 
@@ -24,9 +26,9 @@ public class Canvas extends JPanel implements Observer {
 		this.repo.attach(this);
 	}
 
-	public Canvas(Double[][] coordinates, List<DrawPath> shapes) {
+	public Canvas(Double[][] coordinates, List<List<Line2D>> lines) {
 		this.coordinates = coordinates;
-		this.shapes = shapes;
+		this.lines = lines;
 	}
 
 	protected void paintComponent(Graphics g) {
@@ -36,24 +38,30 @@ public class Canvas extends JPanel implements Observer {
 		int width = getWidth();
 		int height = getHeight();
 		g1.translate(width / 2, height / 2);
-		g1.scale(-0.1, -0.1);
+		g1.scale(1,1);
 		g1.translate(-width / 2, -height / 2);
 		g1.setPaint(Color.BLUE);
 		for (int i = 0; coordinates != null && i < coordinates.length; i++) {
 			double x1 = coordinates[i][0];
 			double y1 = coordinates[i][1];
-			g1.fill(new Ellipse2D.Double(x1 - 2, y1 - 2, 8, 8));
+			g1.fill(new Ellipse2D.Double(x1 - 2, y1 - 2, 5,5));
 		}
 		g1.setPaint(Color.RED);
-//		int i = 1;
-//		while (shapes != null && shapes.size() > i) {
-//			DrawPath coOrd = shapes.get(i);
-//			g1.draw(new Line2D.Double(coOrd.getX1(), coOrd.getY1(), coOrd.getX2(), coOrd.getY2()));
-//			i++;
-//		}
+		g1.setStroke(new BasicStroke(3));
+		int i = 0;
+		int lineSize = lines==null? 0 : lines.size();
+		Color[] colors = {Color.GREEN,Color.YELLOW,Color.PINK}; 
+		while(i<lineSize && lines != null) {
+			List<Line2D> setOfLines = lines.get(i);
+			g1.setPaint(colors[i]);
+			for(Line2D coOrd: setOfLines)
+				{ g1.draw(coOrd); 
+				System.out.println("coOrd of "+i+" "+ coOrd); }
+			i++;
+		}
 		if(pointStack != null)
 		for (Point point : pointStack) {
-			g1.fillOval(point.x, point.y, 50, 50);
+			g1.fillOval(point.x, point.y, 5, 5);
 		}
 	}
 
@@ -64,8 +72,8 @@ public class Canvas extends JPanel implements Observer {
 			repaint();
 	}
 
-	public void setValues(List<DrawPath> shapes2, Double[][] coordinates2) {
+	public void setValues(List<List<Line2D>> paths, Double[][] coordinates2) {
 		this.coordinates = coordinates2;
-		this.shapes = shapes2;
+		this.lines = paths;
 	}
 }

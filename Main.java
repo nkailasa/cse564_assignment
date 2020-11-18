@@ -1,8 +1,11 @@
 package com;
 
 import java.awt.Dimension;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -19,13 +22,14 @@ public class Main extends JFrame {
 	// Menu items
 	static JMenuItem openMenuItem, saveMenuItem, runMenuItem, stopMenuItem, newMenuItem, aboutMenuItem;
 	static Repository repo = Repository.getInstance();
-	
+
 	// create a frame
 	public static JFrame frame;
 	public static Double[][] coordinates;
-	public static List<DrawPath> shapes = new ArrayList<>();
+	public static List<List<Line2D>> paths ;
 	public static Canvas myPanel;
 	static MenuOptionsController listenerObj;
+
 	public static void main(String[] args) {
 
 		// create a frame
@@ -48,9 +52,9 @@ public class Main extends JFrame {
 
 		aboutMenuItem = new JMenuItem("About Team");
 
-		 listenerObj = new MenuOptionsController(frame, shapes, openMenuItem, saveMenuItem, runMenuItem, stopMenuItem,
+		listenerObj = new MenuOptionsController(frame, paths, openMenuItem, saveMenuItem, runMenuItem, stopMenuItem,
 				newMenuItem, aboutMenuItem);
-		
+
 		// add menu items to menu
 		fileMenu.add(openMenuItem);
 		fileMenu.add(saveMenuItem);
@@ -65,9 +69,11 @@ public class Main extends JFrame {
 		menubar.add(fileMenu);
 		menubar.add(projectMenu);
 		menubar.add(aboutMenu);
-		 myPanel = new Canvas(Repository.getInstance());
-		 frame.getContentPane().add(myPanel);
-		myPanel.setPreferredSize(new Dimension(640, 480));
+
+		myPanel = new Canvas(Repository.getInstance());
+		myPanel.setSize(500, 500);
+		frame.getContentPane().add(myPanel);
+
 		// add menubar to frame
 		frame.setJMenuBar(menubar);
 		// set the size of the frame
@@ -75,14 +81,16 @@ public class Main extends JFrame {
 		frame.setVisible(true);
 
 		new Reporter();
-		
+
 	}
+
 	public static void repaintCanvas() {
-		shapes = listenerObj.getShapes();
-		coordinates = listenerObj.getCoordinates();
-		myPanel.setValues(shapes,coordinates);
+		paths = repo.getTopPaths();
+		coordinates = Repository.coordinates;
+		myPanel.setValues(paths, coordinates);
 		myPanel.repaint();
 	}
+
 	public static void refreshPanel() {
 		myPanel.removeAll();
 		myPanel.revalidate();

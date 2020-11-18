@@ -2,10 +2,10 @@ package com;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Line2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,20 +17,22 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileSystemView;
 
+
+
 public class MenuOptionsController {
 	Double[][] coordinates;
 	int count = 0;
 	ArrayList<Integer> tspNearestNodeList;
-	List<DrawPath> shapes = new ArrayList<>();
+	List<List<Line2D>> lines = new ArrayList<>();
 	JFrame currFrame = Main.frame;
 
 	public MenuOptionsController() {
 	}
 
-	public MenuOptionsController(final JFrame frame, List<DrawPath> shapes, JMenuItem openMenuItem,
+	public MenuOptionsController(final JFrame frame, List<List<Line2D>> lines, JMenuItem openMenuItem,
 			JMenuItem saveMenuItem, JMenuItem runMenuItem, JMenuItem stopMenuItem, JMenuItem newMenuItem,
 			JMenuItem aboutMenuItem) {
-		this.shapes = shapes;
+		this.lines = lines;
 		newMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -41,7 +43,12 @@ public class MenuOptionsController {
 		runMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Classroom.init();
+				try {
+					Classroom.init();
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		stopMenuItem.addActionListener(new ActionListener() {
@@ -81,17 +88,17 @@ public class MenuOptionsController {
 					BufferedReader br = null;
 					try {
 						br = new BufferedReader(new FileReader(selectedFile));
-						String currLine = br.readLine();
-						while (currLine != null) {
+						String currLine2D = br.readLine();
+						while (currLine2D != null) {
 							
-							if (currLine.contains("DIMENSION")) {
-								count = Integer.valueOf(currLine.split(":")[1].trim());
+							if (currLine2D.contains("DIMENSION")) {
+								count = Integer.valueOf(currLine2D.split(":")[1].trim());
 							}
-							if (currLine.startsWith("1"))
+							if (currLine2D.startsWith("1"))
 								break;
-							currLine = br.readLine();
+							currLine2D = br.readLine();
 						}
-						coordinates = Repository.populateTable(new Double[count][2], currLine, br, count);
+						coordinates = Repository.populateTable(new Double[count][2], currLine2D, br, count);
 						for (int i = 0; i < coordinates.length; i++) {
 							for (int j = 0; j < 2; j++) {
 								System.out.print(coordinates[i][j] + " ");
@@ -104,7 +111,7 @@ public class MenuOptionsController {
 //						for (int i = 0; i < tspNearestNodeList.size() - 1; i++) {
 //							Integer coord1 = tspNearestNodeList.get(i);
 //							Integer coord2 = tspNearestNodeList.get(i + 1);
-//							shapes.add(new DrawPath(coordinates[coord1][0], coordinates[coord1][1],
+//							lines.add(new DrawPath(coordinates[coord1][0], coordinates[coord1][1],
 //									coordinates[coord2][0], coordinates[coord2][1]));
 //						}
 
@@ -123,9 +130,9 @@ public class MenuOptionsController {
 		});
 	}
 
-	public List<DrawPath> getShapes() {
+	public List<List<Line2D>> getlines() {
 		// TODO Auto-generated method stub
-		return shapes;
+		return lines;
 	}
 
 	public Double[][] getCoordinates() {
