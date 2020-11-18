@@ -2,12 +2,8 @@ package com;
 
 public class AdjacencyMatrix {
 
-	public static void main(String[] args) {
-
-	}
 
 	public Double[][] generateGraph(Double[][] table, Double[][] graph, int count) {
-		System.out.println("Computing. Please wait...");
 		Double dist = (Double) 0.0;
 		for (int i = 0; i < count; i++) {
 			for (int j = 0; j < count; j++) {

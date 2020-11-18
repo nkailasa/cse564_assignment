@@ -19,11 +19,11 @@ public class TSPNearestNeighbor {
 		return adjacencyMatrix;
 	}
 
-	public ArrayList<Integer> tsp(int startCity) {
+	public ArrayList<Integer> tsp(int startCity,Double[][] adjacencyMatrix,Stack<Integer> stack,ArrayList<Integer> nnResult) {
 		numberOfNodes = adjacencyMatrix[1].length - 1;
 		int[] visited = new int[numberOfNodes + 1];
 		visited[1] = 1;
-		stack.push(1);
+		stack.push(startCity);
 		int element, dst = 0, i;
 		double min = Double.MAX_VALUE;
 		boolean minFlag = false;
@@ -54,6 +54,7 @@ public class TSPNearestNeighbor {
 			}
 			stack.pop();
 		}
+		System.out.print(nnResult);
 		return nnResult;
 	}
 }

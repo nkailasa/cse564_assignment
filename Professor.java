@@ -1,14 +1,19 @@
 package com;
 
-public class Professor {
-	static int count;
+import java.util.PriorityQueue;
+import java.util.SortedMap;
 
-	public static void start() {
-		count = Blackboard.count;
-		for(int i=0;i<count;i++) {
-			Student s = new Student(i);
-			s.start();
+public class Professor {
+	
+	public  Professor() {
+		int i=0;
+		Repository repo = Repository.getInstance();
+		SortedMap<Double, Integer> map = repo.getSortedSolution();
+		for(Double dist : map.keySet()) {
+			if(i++==3) break;
+			System.out.println("Top 3 "+map.get(dist));
 		}
 	}
+	
 
 }

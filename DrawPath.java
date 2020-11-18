@@ -13,6 +13,10 @@ class DrawPath extends Main implements ActionListener {
 		this.x2 = x2;
 		this.y2 = y2;
 	}
+	
+	public Double getDistance() {
+		return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
+	}
 
 	public Double getX1() {
 		return x1;

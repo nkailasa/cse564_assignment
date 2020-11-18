@@ -11,13 +11,18 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.PriorityQueue;
+import java.util.SortedMap;
 import java.util.Stack;
+import java.util.TreeMap;
 
 import javax.sound.sampled.Line;
 
 public class Repository extends Observable {
 	private List<Canvas> observers = new ArrayList<Canvas>();
 	private static Repository repoObj;
+	//private static PriorityQueue<Double> pq = new PriorityQueue<Double>((a,b) -> {return (int) (a-b);});
+	private static SortedMap<Double, Integer> distanceMap  = new TreeMap<>();
 	Point point;
 	Line line;
 	Stack<Point> pointStack = new Stack<Point>();
@@ -38,6 +43,11 @@ public class Repository extends Observable {
 
 	Stack<Point> getPoints() {
 		return pointStack;
+
+	}
+	
+	SortedMap<Double, Integer> getSortedSolution() {
+		return distanceMap;
 
 	}
 

@@ -83,4 +83,9 @@ public class Main extends JFrame {
 		myPanel.setValues(shapes,coordinates);
 		myPanel.repaint();
 	}
+	public static void refreshPanel() {
+		myPanel.removeAll();
+		myPanel.revalidate();
+		myPanel.repaint();
+	}
 }

@@ -31,11 +31,23 @@ public class MenuOptionsController {
 			JMenuItem saveMenuItem, JMenuItem runMenuItem, JMenuItem stopMenuItem, JMenuItem newMenuItem,
 			JMenuItem aboutMenuItem) {
 		this.shapes = shapes;
+		newMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Classroom.kill();
+				Main.refreshPanel();
+			}
+		});
 		runMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Professor p = new Professor();
-				p.start();
+				Classroom.init();
+			}
+		});
+		stopMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Classroom.freeze();
 			}
 		});
 		aboutMenuItem.addActionListener(new ActionListener() {
@@ -71,12 +83,13 @@ public class MenuOptionsController {
 						br = new BufferedReader(new FileReader(selectedFile));
 						String currLine = br.readLine();
 						while (currLine != null) {
-							currLine = br.readLine();
+							
 							if (currLine.contains("DIMENSION")) {
 								count = Integer.valueOf(currLine.split(":")[1].trim());
 							}
 							if (currLine.startsWith("1"))
 								break;
+							currLine = br.readLine();
 						}
 						coordinates = Blackboard.populateTable(new Double[count][2], currLine, br, count);
 						for (int i = 0; i < coordinates.length; i++) {
