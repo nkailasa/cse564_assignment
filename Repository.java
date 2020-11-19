@@ -197,9 +197,10 @@ public class Repository extends Observable {
 
 	public void clearAll() {
 		this.coordinates = null;
-		this.pathMap = null;
+		this.pathMap = new HashMap<>();
 		this.studentPaths = null;
-		this.distanceMap = null;
+		this.distanceMap = new TreeMap<>();
+		this.pointStack  = new Stack<Point>();
 		notifyAllObservers();
 	}
 }
