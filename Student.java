@@ -24,11 +24,19 @@ public class Student implements Runnable {
 	public void run() {
 		Repository repo = Repository.getInstance();
 		Double[][] coordinates = repo.getCoordinates();
-		int startId = id, endId = startId + 10;
+		int startId = id, endId = startId + 10,count=repo.getCount();
 		if (extraThreads > 0)
 			endId = startId + extraThreads;
-		while (isRun && (startId < endId)) {
-			int i = 0;
+		while ((startId < endId) && startId<count) {
+			if (!isRun) {
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+
+				}
+			}
+
+			int i = 1;
 			ArrayList<Integer> tspNearestNodeList = new TSPNearestNeighbor().tsp(Integer.valueOf(startId),
 					repo.getAdjMatrix(), new Stack<Integer>(), new ArrayList<>());
 			List<Line2D> lines = new ArrayList<Line2D>();

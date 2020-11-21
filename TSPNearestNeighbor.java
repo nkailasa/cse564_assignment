@@ -10,7 +10,7 @@ public class TSPNearestNeighbor {
 
 	public ArrayList<Integer> tsp(int startCity, Double[][] adjacencyMatrix, Stack<Integer> stack,
 			ArrayList<Integer> nnResult) {
-		int numberOfNodes = adjacencyMatrix[1].length - 1;
+		int numberOfNodes = adjacencyMatrix[1].length;
 		int[] visited = new int[numberOfNodes + 1];
 		visited[1] = 1;
 		stack.push(startCity);
@@ -20,9 +20,11 @@ public class TSPNearestNeighbor {
 
 		while (!stack.isEmpty()) {
 			element = stack.peek();
-			i = 1;
+			if(element < 0 || element >= adjacencyMatrix.length)
+				break;
+			i = 0;
 			min = Integer.MAX_VALUE;
-			while (i <= numberOfNodes) {
+			while (i < numberOfNodes) {
 				double curr = adjacencyMatrix[element][i];
 				if (curr > 1.00 && visited[i] == 0) {
 					if (min > curr) {

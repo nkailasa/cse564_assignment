@@ -84,21 +84,16 @@ public class Canvas extends JPanel implements Observer {
 			double y1 = coordinates[i][1];
 			g1.fill(new Ellipse2D.Double(x1 - 2, y1 - 2, 3, 3));
 		}
-		g1.setPaint(Color.RED);
+		
 		g1.setStroke(new BasicStroke(1));
 		List<List<Line2D>> lines = repo.getTopPaths();
-		Color[] colors = { Color.GREEN, Color.YELLOW, Color.PINK };
+		Color[] colors = { Color.RED, Color.GREEN, Color.PINK ,Color.CYAN };
 		for (List<Line2D> list : lines) {
 			g1.setPaint(colors[new Random().nextInt(2)]);
 			for (Line2D line : list) {
 				g1.draw(line);
 			}
 		}
-		Stack<Point> pointStack = repo.getPoints();
-		if (pointStack != null)
-			for (Point point : pointStack) {
-				g1.fillOval(point.x, point.y, 5, 5);
-			}
 	}
 
 	@Override

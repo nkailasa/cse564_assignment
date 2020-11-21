@@ -8,10 +8,14 @@ import java.util.SortedMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class Professor implements Runnable {
-boolean isRun=true;
+boolean isRun;
+
+Professor() {
+	 isRun=true;
+}
 
 public void setRun(boolean bool) {
-	this.isRun = bool;
+	isRun = bool;
 }
 	@Override
 	public void run() {

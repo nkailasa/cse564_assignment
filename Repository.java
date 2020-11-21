@@ -1,24 +1,19 @@
 package com;
 
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
+
+import javax.swing.JFileChooser;
 
 public class Repository extends Observable {
 	private Double[][] coordinates;
@@ -28,7 +23,6 @@ public class Repository extends Observable {
 	private static Repository repoObj;
 	PriorityBlockingQueue<TopPaths> topPathQ = new PriorityBlockingQueue<>();
 	private List<List<Line2D>> topstudentPaths = new ArrayList<>();
-	String filename = "C:\\TSPOutputFile.txt";
 	Stack<Point> pointStack = new Stack<Point>();
 	Stack<Line2D> line2DStack = new Stack<Line2D>();
 
@@ -36,10 +30,6 @@ public class Repository extends Observable {
 	double ymax = Double.MIN_VALUE;
 	double xmin = Double.MAX_VALUE;
 	double ymin = Double.MAX_VALUE;
-
-	private void Repository() {
-
-	}
 
 	public static Repository getInstance() {
 		if (repoObj == null)
@@ -67,12 +57,9 @@ public class Repository extends Observable {
 			String Line2D = currLine2D;
 			repoObj.setCoordinates(coordinates);
 			repoObj.setCount(count);
-			File outputfile = new File(filename);
-			FileOutputStream outstream = new FileOutputStream(outputfile);
-			outstream.write("DIMENSION:".getBytes());
-			outstream.write(String.valueOf(count).getBytes());
+
 			while (idx < count && Line2D != null) {
-				
+
 				String[] values = Line2D.trim().split(" ");
 				if (values.length > 1) {
 					coordinates[idx][0] = Double.valueOf(values[1]);
@@ -85,31 +72,18 @@ public class Repository extends Observable {
 				Line2D = br.readLine();
 			}
 
-			outstream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if(Math.max(xmax, ymax)>500) {
-		Double widthOld = xmax - xmin;
-		Double heightOld = ymax - ymin;
-		System.out.println("count:" + this.count);
-		idx = 0;
-		for (; idx < this.count; idx++) {
-			coordinates[idx][0] = (coordinates[idx][0] * 100) / widthOld;
-			coordinates[idx][1] = (coordinates[idx][1] * 100) / heightOld;
-		}
-		}
-		String outputStreamValues = "     \n";
-		for (idx = 1; idx <= this.count; idx++) {
-			outputStreamValues += ""+idx + " " + coordinates[idx-1][0] + " " + coordinates[idx-1][1] + "\n";
-		}
-
-System.out.println(outputStreamValues);
-		try {
-			Files.write(Paths.get(filename), outputStreamValues.getBytes(), StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (Math.max(xmax, ymax) > 500) {
+			Double widthOld = xmax - xmin;
+			Double heightOld = ymax - ymin;
+			System.out.println("count:" + this.count);
+			idx = 0;
+			for (; idx < this.count; idx++) {
+				coordinates[idx][0] = (coordinates[idx][0] * 100) / widthOld;
+				coordinates[idx][1] = (coordinates[idx][1] * 100) / heightOld;
+			}
 		}
 		notifyAllObservers();
 	}
@@ -124,11 +98,11 @@ System.out.println(outputStreamValues);
 
 	public void setPoints(int x, int y) {
 		this.pointStack.add(new Point(x, y));
-		Double[][] coordinatesCopy = new Double[count+1][];
+		Double[][] coordinatesCopy = new Double[count + 1][];
 		System.arraycopy(coordinates, 0, coordinatesCopy, 0, coordinates.length);
 		coordinatesCopy[count] = new Double[2];
-		coordinatesCopy[count][0]=(double) x;
-		coordinatesCopy[count][1]=(double) y;
+		coordinatesCopy[count][0] = (double) x;
+		coordinatesCopy[count][1] = (double) y;
 		count++;
 		setAdjMatrix(new AdjacencyMatrix().generateGraph(coordinatesCopy, new Double[count][count], count));
 		this.setCoordinates(coordinatesCopy);
@@ -147,31 +121,26 @@ System.out.println(outputStreamValues);
 	}
 
 	public void savePointsToRepo() throws IOException {
-		String newValues = "";
-		int len = coordinates.length -pointStack.size() ;
-		RandomAccessFile f;
-		try {
-			f = new RandomAccessFile(new File(filename), "rw");
-			f.seek(0); // to the beginning
-			f.write("DIMENSION : ".getBytes());
-			f.write(String.valueOf(coordinates.length).getBytes());
-			f.write("\n".getBytes());
-			f.close();
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		String outputStreamValues = "DIMENSION : " + String.valueOf(coordinates.length) + "\n";
+		for (int idx = 1; idx <= this.count; idx++) {
+			outputStreamValues += "" + idx + " " + coordinates[idx - 1][0] + " " + coordinates[idx - 1][1] + "\n";
 		}
-		for (Point p : pointStack) {
-			len++;
-			newValues += ""+len + " " + p.x + " " + p.y + "\n";
-		}
-		try {
-			Files.write(Paths.get(filename), newValues.getBytes(), StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("Specify a file to save");
+
+		int userSelection = fileChooser.showSaveDialog(new Frame());
+
+		if (userSelection == JFileChooser.APPROVE_OPTION) {
+			File fileToSave = fileChooser.getSelectedFile();
+			System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+			File fileWithAbsolutePath = new File(fileToSave.getAbsolutePath());
+			fileWithAbsolutePath.createNewFile();
+			FileWriter myWriter = new FileWriter(fileWithAbsolutePath);
+			myWriter.write(outputStreamValues);
+			myWriter.close();
+			}
 	}
+
 	public List<List<Line2D>> getTopPaths() {
 		return this.topstudentPaths;
 
