@@ -11,6 +11,7 @@ import java.awt.geom.Line2D;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 import java.util.Stack;
 
 import javax.swing.JMenu;
@@ -19,10 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 public class Canvas extends JPanel implements Observer {
-	
-	
-	
-	Repository repo;
+
 	public JMenuBar createUI() {
 		JMenu fileMenu, projectMenu, aboutMenu;
 		JMenuItem openMenuItem, saveMenuItem, runMenuItem, stopMenuItem, newMenuItem, aboutMenuItem;
@@ -30,21 +28,22 @@ public class Canvas extends JPanel implements Observer {
 		projectMenu = new JMenu("Project");
 		aboutMenu = new JMenu("About");
 
+		MenuItemListener menuListener = new MenuItemListener();
 		// create menuitems
 		openMenuItem = new JMenuItem("Open");
-		openMenuItem.addActionListener(new OpenMenuListener());
+		openMenuItem.addActionListener(menuListener);
 		saveMenuItem = new JMenuItem("Save");
-		saveMenuItem.addActionListener(new SaveMenuListener());
+		saveMenuItem.addActionListener(menuListener);
 
 		newMenuItem = new JMenuItem("New");
-		newMenuItem.addActionListener(new NewMenuListener());
+		newMenuItem.addActionListener(menuListener);
 		runMenuItem = new JMenuItem("Run");
-		runMenuItem.addActionListener(new RunMenuListener());
+		runMenuItem.addActionListener(menuListener);
 		stopMenuItem = new JMenuItem("Stop");
-		stopMenuItem.addActionListener(new StopMenuListener());
+		stopMenuItem.addActionListener(menuListener);
 
 		aboutMenuItem = new JMenuItem("About Team");
-		aboutMenuItem.addActionListener(new AboutMenuListener());
+		aboutMenuItem.addActionListener(menuListener);
 
 		// add menu items to menu
 		fileMenu.add(openMenuItem);
@@ -60,58 +59,54 @@ public class Canvas extends JPanel implements Observer {
 		menubar.add(fileMenu);
 		menubar.add(projectMenu);
 		menubar.add(aboutMenu);
-		
+
 		return menubar;
 	}
 
-
 	public Canvas() {
-		repo = Repository.getInstance();
+
 	}
 
 	protected void paintComponent(Graphics g) {
+		Repository repo = Repository.getInstance();
 		super.paintComponent(g);
 		Graphics2D g1 = (Graphics2D) g;
 		g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		int width = getWidth();
 		int height = getHeight();
 		g1.translate(width / 2, height / 2);
-		g1.scale(1,1);
+		g1.scale(1, 1);
 		g1.translate(-width / 2, -height / 2);
 		g1.setPaint(Color.BLUE);
 		Double[][] coordinates = repo.getCoordinates();
 		for (int i = 0; coordinates != null && i < coordinates.length; i++) {
 			double x1 = coordinates[i][0];
 			double y1 = coordinates[i][1];
-			g1.fill(new Ellipse2D.Double(x1 - 2, y1 - 2, 5,5));
+			g1.fill(new Ellipse2D.Double(x1 - 2, y1 - 2, 3, 3));
 		}
 		g1.setPaint(Color.RED);
-		g1.setStroke(new BasicStroke(3));
-		int i = 0;
+		g1.setStroke(new BasicStroke(1));
 		List<List<Line2D>> lines = repo.getTopPaths();
-		int lineSize = lines==null? 0 : lines.size();
-		Color[] colors = {Color.GREEN,Color.YELLOW,Color.PINK}; 
-		while(i<lineSize && lines != null) {
-			List<Line2D> setOfLines = lines.get(i);
-			g1.setPaint(colors[i]);
-			for(Line2D coOrd: setOfLines)
-				{ g1.draw(coOrd); 
-				System.out.println("coOrd of "+i+" "+ coOrd.getX1()+" "+coOrd.getY1()+"| "+
-				coOrd.getX2()+" "+coOrd.getY2()); }
-			i++;
+		Color[] colors = { Color.GREEN, Color.YELLOW, Color.PINK };
+		for (List<Line2D> list : lines) {
+			g1.setPaint(colors[new Random().nextInt(2)]);
+			for (Line2D line : list) {
+				g1.draw(line);
+			}
 		}
 		Stack<Point> pointStack = repo.getPoints();
-		if(pointStack != null)
-		for (Point point : pointStack) {
-			g1.fillOval(point.x, point.y, 5, 5);
-		}
+		if (pointStack != null)
+			for (Point point : pointStack) {
+				g1.fillOval(point.x, point.y, 5, 5);
+			}
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
+		Repository repo = Repository.getInstance();
 		Stack<Point> pointStack = repo.getPoints();
 		Double[][] coordinates = repo.getCoordinates();
-		if (pointStack != null || coordinates!=null)
+		if (pointStack != null || coordinates != null)
 			repaint();
 	}
 

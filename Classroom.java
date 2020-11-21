@@ -1,38 +1,43 @@
 package com;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Classroom extends Thread {
-	static List<Student> students = new ArrayList();
+	int count = Repository.getInstance().getCount();
+	Professor profObj;
+	int incr = count / 10;
+	int extra = count % 10;
+	Thread[] studentThreads;
+	Student stuObj;
 
-	static int count;
-	static Student[] s;
-
-	public static void init() throws InterruptedException {
-		Thread profThread = new Thread(new Professor(), "prof");
-		count = Repository.getInstance().getCount();
-		s = new Student[count];
-		for (int i = 0; i < 10; i++) {
-			Thread t = new Thread(new Student(i), String.valueOf(i));
-			t.start();
-		}
-		
-		Thread.sleep(10000);
-		profThread.start();
-		
+	public Classroom() {
+		profObj = new Professor();
+		studentThreads = new Thread[incr + 1];
 	}
 
-	public static void kill() {
-		for (Student s : students) {
-			s.stop();
+	public void init() {
+		profObj.setRun(true);
+		Thread p = new Thread(profObj);
+		p.start();
+
+		for (int i = 0; i <= incr; i++) {
+			if (i == incr)
+				studentThreads[i] = new Thread(new Student((i * 10), extra));
+			else
+				studentThreads[i] = new Thread(new Student(i * 10, 0));
+			studentThreads[i].start();
 		}
+	}
+
+	public void freeze() {
+		profObj.setRun(false);
+		stuObj.setRun(false);
+	}
+
+	public void clearAll() {
+		profObj.setRun(false);
+		stuObj = new Student();
+		stuObj.setRun(false);
+
 		Repository.getInstance().clearAll();
 	}
 
-	public static void freeze() {
-		for (Student s : students) {
-			s.freeze();
-		}
-	}
 }

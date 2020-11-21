@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.SortedMap;
 import java.util.Stack;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class Repository extends Observable {
 	private Double[][] coordinates;
@@ -26,16 +26,19 @@ public class Repository extends Observable {
 	private Double[][] adjMatrix;
 	private List<Canvas> observers = new ArrayList<Canvas>();
 	private static Repository repoObj;
-	private SortedMap<Double, Integer> distanceMap = new TreeMap<>();
-	private Map<Integer, List<Line2D>> pathMap = new HashMap<>();
-	private List<List<Line2D>> studentPaths;
-	Point point;
-	Line2D Line2D;
+	PriorityBlockingQueue<TopPaths> topPathQ = new PriorityBlockingQueue<>();
+	private List<List<Line2D>> topstudentPaths = new ArrayList<>();
+	String filename = "C:\\TSPOutputFile.txt";
 	Stack<Point> pointStack = new Stack<Point>();
 	Stack<Line2D> line2DStack = new Stack<Line2D>();
 
+	double xmax = Double.MIN_VALUE;
+	double ymax = Double.MIN_VALUE;
+	double xmin = Double.MAX_VALUE;
+	double ymin = Double.MAX_VALUE;
+
 	private void Repository() {
-		
+
 	}
 
 	public static Repository getInstance() {
@@ -53,11 +56,6 @@ public class Repository extends Observable {
 
 	}
 
-	SortedMap<Double, Integer> getSortedSolution() {
-		return this.distanceMap;
-
-	}
-
 	Stack<Line2D> getLine2Ds() {
 		return this.line2DStack;
 
@@ -65,26 +63,24 @@ public class Repository extends Observable {
 
 	void populateTable(Double[][] coordinates, String currLine2D, BufferedReader br, int count) {
 		int idx = 0;
-		double xmax = Double.MIN_VALUE;
-		double ymax = Double.MIN_VALUE;
 		try {
 			String Line2D = currLine2D;
 			repoObj.setCoordinates(coordinates);
 			repoObj.setCount(count);
-			File outputfile = new File("C:\\MyOutputFile.txt");
+			File outputfile = new File(filename);
 			FileOutputStream outstream = new FileOutputStream(outputfile);
 			outstream.write("DIMENSION:".getBytes());
 			outstream.write(String.valueOf(count).getBytes());
-			outstream.write("    \n".getBytes());
 			while (idx < count && Line2D != null) {
-				outstream.write(Line2D.getBytes());
-				outstream.write(Byte.valueOf((byte) '\n'));
-				String[] values = Line2D.trim().split(" +");
+				
+				String[] values = Line2D.trim().split(" ");
 				if (values.length > 1) {
 					coordinates[idx][0] = Double.valueOf(values[1]);
 					coordinates[idx++][1] = Double.valueOf(values[2]);
 					xmax = Math.max(Double.valueOf(values[1]), xmax);
 					ymax = Math.max(Double.valueOf(values[2]), ymax);
+					xmin = Math.min(Double.valueOf(values[1]), xmin);
+					ymin = Math.min(Double.valueOf(values[2]), ymin);
 				}
 				Line2D = br.readLine();
 			}
@@ -93,15 +89,27 @@ public class Repository extends Observable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Double factor = xmax > 1500 ? 500 : xmax;
-		System.out.println("Dividing factor:" + factor);
+		if(Math.max(xmax, ymax)>500) {
+		Double widthOld = xmax - xmin;
+		Double heightOld = ymax - ymin;
 		System.out.println("count:" + this.count);
 		idx = 0;
 		for (; idx < this.count; idx++) {
-			for (int j = 0; j < 2; j++) {
-				this.coordinates[idx][j] = this.coordinates[idx][j] / factor;
+			coordinates[idx][0] = (coordinates[idx][0] * 100) / widthOld;
+			coordinates[idx][1] = (coordinates[idx][1] * 100) / heightOld;
+		}
+		}
+		String outputStreamValues = "     \n";
+		for (idx = 1; idx <= this.count; idx++) {
+			outputStreamValues += ""+idx + " " + coordinates[idx-1][0] + " " + coordinates[idx-1][1] + "\n";
+		}
 
-			}
+System.out.println(outputStreamValues);
+		try {
+			Files.write(Paths.get(filename), outputStreamValues.getBytes(), StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		notifyAllObservers();
 	}
@@ -109,13 +117,22 @@ public class Repository extends Observable {
 	public void setCount(int count) {
 		this.count = count;
 	}
-	
+
 	public int getCount() {
 		return this.count;
 	}
 
 	public void setPoints(int x, int y) {
 		this.pointStack.add(new Point(x, y));
+		Double[][] coordinatesCopy = new Double[count+1][];
+		System.arraycopy(coordinates, 0, coordinatesCopy, 0, coordinates.length);
+		coordinatesCopy[count] = new Double[2];
+		coordinatesCopy[count][0]=(double) x;
+		coordinatesCopy[count][1]=(double) y;
+		count++;
+		setAdjMatrix(new AdjacencyMatrix().generateGraph(coordinatesCopy, new Double[count][count], count));
+		this.setCoordinates(coordinatesCopy);
+		this.setCount(count);
 		notifyAllObservers();
 	}
 
@@ -131,16 +148,13 @@ public class Repository extends Observable {
 
 	public void savePointsToRepo() throws IOException {
 		String newValues = "";
-		int len = coordinates.length;
+		int len = coordinates.length -pointStack.size() ;
 		RandomAccessFile f;
 		try {
-			int size = Math.addExact(pointStack.size(), len);
-			coordinates = new Double[size][];
-			System.out.println(size);
-			f = new RandomAccessFile(new File("C:\\MyOutputFile.txt"), "rw");
+			f = new RandomAccessFile(new File(filename), "rw");
 			f.seek(0); // to the beginning
 			f.write("DIMENSION : ".getBytes());
-			f.write(String.valueOf(size).getBytes());
+			f.write(String.valueOf(coordinates.length).getBytes());
 			f.write("\n".getBytes());
 			f.close();
 		} catch (FileNotFoundException e1) {
@@ -149,33 +163,22 @@ public class Repository extends Observable {
 		}
 		for (Point p : pointStack) {
 			len++;
-			newValues += len + " " + p.x + " " + p.y + "\n";
+			newValues += ""+len + " " + p.x + " " + p.y + "\n";
 		}
-
 		try {
-			Files.write(Paths.get("C:\\MyOutputFile.txt"), newValues.getBytes(), StandardOpenOption.APPEND);
+			Files.write(Paths.get(filename), newValues.getBytes(), StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
-	public Map<Integer, List<Line2D>> getStudentPathMap() {
-		return this.pathMap;
-	}
-
-	public void setPathMap(Map<Integer, List<Line2D>> pathMap) {
-		this.pathMap = pathMap;
-
-	}
-
 	public List<List<Line2D>> getTopPaths() {
-		return this.studentPaths;
+		return this.topstudentPaths;
 
 	}
 
 	public void setTopPaths(List<List<java.awt.geom.Line2D>> paths) {
-		this.studentPaths = paths;
+		this.topstudentPaths = paths;
 		notifyAllObservers();
 	}
 
@@ -186,7 +189,7 @@ public class Repository extends Observable {
 	public void setCoordinates(Double[][] coOr) {
 		this.coordinates = coOr;
 	}
-	
+
 	public Double[][] getAdjMatrix() {
 		return this.adjMatrix;
 	}
@@ -197,10 +200,17 @@ public class Repository extends Observable {
 
 	public void clearAll() {
 		this.coordinates = null;
-		this.pathMap = new HashMap<>();
-		this.studentPaths = null;
-		this.distanceMap = new TreeMap<>();
-		this.pointStack  = new Stack<Point>();
+		this.topstudentPaths.clear();
+		this.pointStack.clear();
+		this.topPathQ.clear();
 		notifyAllObservers();
+	}
+
+	public void setTopPathQ(TopPaths q) {
+		topPathQ.add(q);
+	}
+
+	public PriorityBlockingQueue<TopPaths> getTopPathsQ() {
+		return topPathQ;
 	}
 }
